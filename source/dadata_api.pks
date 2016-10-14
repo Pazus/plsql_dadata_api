@@ -148,14 +148,14 @@ CREATE OR REPLACE PACKAGE dadata_api IS
     );
   TYPE typ_date_data_list IS TABLE OF typ_date_data INDEX BY PLS_INTEGER;
 
-  TYPE typ_auto_data IS RECORD(
+  TYPE typ_vehicle_data IS RECORD(
      SOURCE VARCHAR2(100 CHAR) -- Исходное значение
     ,RESULT VARCHAR2(100 CHAR) -- Стандартизованное значение
     ,brand  VARCHAR2(50 CHAR) -- Марка
     ,model  VARCHAR2(50 CHAR) -- Модель
     ,qc     typ_qc -- Код проверки
     );
-  TYPE typ_auto_data_list IS TABLE OF typ_auto_data INDEX BY PLS_INTEGER;
+  TYPE typ_vehicle_data_list IS TABLE OF typ_vehicle_data INDEX BY PLS_INTEGER;
 
   -- Код проверки (qc) — нужно ли вручную проверить распознанный адрес:
   gc_addr_qc_ok     CONSTANT typ_qc := 0; -- Адрес распознан уверенно
@@ -187,9 +187,9 @@ CREATE OR REPLACE PACKAGE dadata_api IS
   gc_date_qc_trash  CONSTANT typ_qc := 2; -- Исходное значение пустое или заведомо «мусорное»
 
   -- Код проверки (qc) — требуется ли вручную проверить распознанное значение:
-  gc_auto_qc_ok     CONSTANT typ_qc := 0; -- Исходное значение распознано уверенно
-  gc_auto_qc_assume CONSTANT typ_qc := 1; -- Исходное значение распознано с допущениями или не распознано (Нужно проверить вручную)
-  gc_auto_qc_trash  CONSTANT typ_qc := 2; -- Исходное значение пустое или заведомо «мусорное»
+  gc_vehicle_qc_ok     CONSTANT typ_qc := 0; -- Исходное значение распознано уверенно
+  gc_vehicle_qc_assume CONSTANT typ_qc := 1; -- Исходное значение распознано с допущениями или не распознано (Нужно проверить вручную)
+  gc_vehicle_qc_trash  CONSTANT typ_qc := 2; -- Исходное значение пустое или заведомо «мусорное»
 
   gc_structure_asis     CONSTANT VARCHAR2(5) := 'AS_IS';
   gc_structure_name     CONSTANT VARCHAR2(4) := 'NAME';
@@ -234,34 +234,99 @@ CREATE OR REPLACE PACKAGE dadata_api IS
   ex_internal_error EXCEPTION;
   PRAGMA EXCEPTION_INIT(ex_internal_error, -20500);
 
+  -- Функции, вынесенные для тестирования
+  $IF $$dadata_test $THEN
+  FUNCTION map_addr_json_to_rec(p_json JSON) RETURN typ_address_data;
+  FUNCTION map_phone_json_to_rec(p_json JSON) RETURN typ_phone_data;
+  FUNCTION map_passport_json_to_rec(p_json JSON) RETURN typ_passport_data;
+  FUNCTION map_name_json_to_rec(p_json JSON) RETURN typ_name_data;
+  FUNCTION map_email_json_to_rec(p_json JSON) RETURN typ_email_data;
+  FUNCTION map_date_json_to_rec(p_json JSON) RETURN typ_date_data;
+  FUNCTION map_vechile_json_to_rec(p_json JSON) RETURN typ_vehicle_data;
+  $END
+
+  -- Стандартизация адресов
   PROCEDURE recognize_addresses
   (
     p_addresses         typ_strings
    ,p_address_data_list OUT typ_address_data_list
   );
+  PROCEDURE recognize_address
+  (
+    p_address      VARCHAR2
+   ,p_address_data OUT typ_address_data
+  );
 
+  -- Стандартизация телефонов
   PROCEDURE recognize_phones
   (
     p_phones           typ_strings
    ,p_phones_data_list OUT typ_phone_data_list
   );
+  PROCEDURE recognize_phone
+  (
+    p_phone      VARCHAR2
+   ,p_phone_data OUT typ_phone_data
+  );
 
+  -- Стандартизация паспортов
   PROCEDURE recognize_passport
   (
     p_passports           typ_strings
    ,p_passports_data_list OUT typ_passport_data_list
   );
+  PROCEDURE recognize_passport
+  (
+    p_passport      VARCHAR2
+   ,p_passport_data OUT typ_passport_data
+  );
 
+  -- Стандартизация имен
   PROCEDURE recognize_name
   (
     p_names           typ_strings
    ,p_names_data_list OUT typ_name_data_list
   );
+  PROCEDURE recognize_name
+  (
+    p_name      VARCHAR2
+   ,p_name_data OUT typ_name_data
+  );
 
+  -- Стандартизация email'ов
+  PROCEDURE recognize_email
+  (
+    p_emails           typ_strings
+   ,p_emails_data_list OUT typ_email_data_list
+  );
+  PROCEDURE recognize_email
+  (
+    p_email      VARCHAR2
+   ,p_email_data OUT typ_email_data
+  );
+
+  -- Стандартизация дат
   PROCEDURE recognize_date
   (
     p_dates           typ_strings
    ,p_dates_data_list OUT typ_date_data_list
+  );
+  PROCEDURE recognize_date
+  (
+    p_date      VARCHAR2
+   ,p_date_data OUT typ_date_data
+  );
+
+  -- Стандартизация автомабилей
+  PROCEDURE recognize_vehicle
+  (
+    p_vehicle           typ_strings
+   ,p_vehicle_data_list OUT typ_vehicle_data_list
+  );
+  PROCEDURE recognize_vehicle
+  (
+    p_vehicle      VARCHAR2
+   ,p_vehicle_data OUT typ_vehicle_data
   );
 
 END dadata_api;
