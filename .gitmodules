@@ -1,0 +1,3 @@
+[submodule "lib/pljson"]
+	path = lib/pljson
+	url = https://github.com/pljson/pljson.git
